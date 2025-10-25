@@ -19,15 +19,23 @@ const getRpcUrl = (network: 'devnet' | 'testnet' | 'mainnet') => {
   const provider = import.meta.env.VITE_RPC_PROVIDER || 'allthatnode';
   
   switch (provider) {
+    case 'official':
+      // Sui Official Endpoints (En Güvenilir)
+      const officialUrl = network === 'mainnet' 
+        ? 'https://fullnode.mainnet.sui.io:443'
+        : 'https://fullnode.testnet.sui.io:443';
+      console.log('🔗 Sui Official RPC URL:', officialUrl);
+      return officialUrl;
+    
     case 'quicknode':
       const quicknodeKey = import.meta.env.VITE_QUICKNODE_API_KEY;
       const quicknodeEndpoint = import.meta.env.VITE_QUICKNODE_ENDPOINT;
       if (quicknodeKey && quicknodeEndpoint) {
         return `${quicknodeEndpoint}/${quicknodeKey}/`;
       }
-      // Fallback to AllThatNode
-      console.warn('⚠️ QuickNode config eksik, AllThatNode fallback');
-      return `https://sui-${network}-rpc.allthatnode.com`;
+      // Fallback to Official
+      console.warn('⚠️ QuickNode config eksik, Official fallback');
+      return network === 'mainnet' ? 'https://fullnode.mainnet.sui.io:443' : 'https://fullnode.testnet.sui.io:443';
     
     case 'ankr':
       const ankrKey = import.meta.env.VITE_ANKR_API_KEY;
@@ -38,9 +46,9 @@ const getRpcUrl = (network: 'devnet' | 'testnet' | 'mainnet') => {
         console.log('🔗 Ankr RPC URL:', ankrUrl);
         return ankrUrl;
       }
-      // Fallback to AllThatNode
-      console.warn('⚠️ Ankr API key eksik, AllThatNode fallback');
-      return `https://sui-${network}-rpc.allthatnode.com`;
+      // Fallback to Official
+      console.warn('⚠️ Ankr API key eksik, Official fallback');
+      return network === 'mainnet' ? 'https://fullnode.mainnet.sui.io:443' : 'https://fullnode.testnet.sui.io:443';
     
     case 'allthatnode':
     default:

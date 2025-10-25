@@ -234,12 +234,12 @@ function WalletDebug() {
         console.log('🔍 Network debug başlıyor...');
         setNetwork('🔄 Bağlantı test ediliyor...');
         
-        // İlk olarak basit HTTP test - Ankr (CORS bypass ile)
+        // İlk olarak basit HTTP test - Sui Official (CORS bypass ile)
         try {
-          console.log('🔍 Ankr API test başlıyor...');
+          console.log('🔍 Sui Official API test başlıyor...');
           
           // CORS problemi olabilir, alternatif test
-          const testResponse = await fetch('https://rpc.ankr.com/sui_testnet/07bef38f0bfc1ae298b47d8e1e861d5a90128a415cdf9ce2ab0d8c52d3ad35d0', {
+          const testResponse = await fetch('https://fullnode.testnet.sui.io:443', {
             method: 'POST',
             headers: { 
               'Content-Type': 'application/json',
@@ -255,14 +255,14 @@ function WalletDebug() {
           
           if (testResponse.ok) {
             const result = await testResponse.json();
-            console.log('✅ Ankr RPC erişimi başarılı:', result);
-            setNetwork(`✅ Ankr (Chain: ${result.result || 'Unknown'})`);
+            console.log('✅ Sui Official RPC erişimi başarılı:', result);
+            setNetwork(`✅ Sui Official (Chain: ${result.result || 'Unknown'})`);
           } else {
-            console.warn('⚠️ Ankr RPC yanıt hatası:', testResponse.status);
-            setNetwork('⚠️ Ankr RPC Yanıt Hatası');
+            console.warn('⚠️ Sui Official RPC yanıt hatası:', testResponse.status);
+            setNetwork('⚠️ Sui Official RPC Yanıt Hatası');
           }
         } catch (httpError) {
-          console.warn('⚠️ Ankr RPC test hatası (CORS olabilir):', httpError);
+          console.warn('⚠️ Sui Official RPC test hatası (CORS olabilir):', httpError);
           setNetwork('⚠️ CORS/Network Hatası');
           
           // Fallback: SuiClient ile test
@@ -270,7 +270,7 @@ function WalletDebug() {
             console.log('🔄 SuiClient ile fallback test...');
             const balance = await suiClient.getBalance({ owner: address });
             console.log('✅ SuiClient çalışıyor:', balance);
-            setNetwork('✅ SuiClient Aktif (via Ankr)');
+            setNetwork('✅ SuiClient Aktif (via Sui Official)');
           } catch (suiError) {
             console.error('❌ SuiClient de başarısız:', suiError);
             setNetwork('❌ RPC Tamamen Başarısız');
@@ -368,11 +368,11 @@ function WalletDebug() {
           <button 
             onClick={async () => {
               try {
-                console.log('🧪 Manuel Ankr RPC test başlıyor...');
+                console.log('🧪 Manuel Sui Official RPC test başlıyor...');
                 
-                // Manuel RPC test - Ankr (CORS aware)
+                // Manuel RPC test - Sui Official (CORS aware)
                 const testRpc = async () => {
-                  const response = await fetch('https://rpc.ankr.com/sui_testnet/07bef38f0bfc1ae298b47d8e1e861d5a90128a415cdf9ce2ab0d8c52d3ad35d0', {
+                  const response = await fetch('https://fullnode.testnet.sui.io:443', {
                     method: 'POST',
                     headers: { 
                       'Content-Type': 'application/json',
@@ -389,10 +389,10 @@ function WalletDebug() {
                 };
                 
                 const result = await testRpc();
-                console.log('🧪 Ankr RPC test sonucu:', result);
+                console.log('🧪 Sui Official RPC test sonucu:', result);
                 
                 if (result.result) {
-                  alert(`✅ RPC Bağlantısı Başarılı!\n\nProvider: Ankr (Premium)\nChain ID: ${result.result}\nAPI Key: Aktif\nLimit: 500K req/day`);
+                  alert(`✅ RPC Bağlantısı Başarılı!\n\nProvider: Sui Official (Resmi)\nChain ID: ${result.result}\nAPI Key: Gerekmiyor\nLimit: Unlimited`);
                 } else {
                   alert(`❌ RPC Test Başarısız!\n\nHata: ${result.error?.message || 'Bilinmeyen hata'}\n\nNot: Bu normal olabilir (CORS koruması)`);
                 }
@@ -415,11 +415,11 @@ function WalletDebug() {
         
         {/* RPC Status */}
         <div className="text-xs mt-2 p-2 bg-gray-100 rounded">
-          <strong>RPC:</strong> Ankr (Premium API)
+          <strong>RPC:</strong> Sui Official (Resmi Endpoint)
           <br />
-          <strong>Endpoint:</strong> rpc.ankr.com/sui_testnet
+          <strong>Endpoint:</strong> fullnode.testnet.sui.io:443
           <br />
-          <strong>API Key:</strong> ✅ Aktif (500K req/day)
+          <strong>API Key:</strong> ✅ Gerekmiyor (Free & Unlimited)
           <br />
           <strong>Status:</strong> {network.includes('✅') ? '🟢 Aktif' : '🔴 Hata'}
         </div>
@@ -989,7 +989,7 @@ function TokenManagement() {
                     console.log('✅ RPC bağlantısı başarılı! Current epoch:', epoch);
                   } catch (rpcError) {
                     console.error('❌ RPC bağlantı hatası:', rpcError);
-                    alert('❌ RPC bağlantısı başarısız! Ankr API key kontrol edin.');
+                    alert('❌ RPC bağlantısı başarısız! Sui Official endpoint kontrol edin.');
                     return;
                   }
                   
@@ -1038,7 +1038,7 @@ function TokenManagement() {
                   
                   if (result) {
                     const digest = (result as any).digest;
-                    alert(`🎉 Gerçek blockchain transaction başarılı!\n\nProvider: Ankr RPC\nAPI Key: Aktif\n🔗 Transaction Digest: ${digest}\n\n✅ Sui Explorer'da görüntüle`);
+                    alert(`🎉 Gerçek blockchain transaction başarılı!\n\nProvider: Sui Official RPC\nAPI Key: Gerekmiyor\n🔗 Transaction Digest: ${digest}\n\n✅ Sui Explorer'da görüntüle`);
                     
                     // Sui Explorer'da aç
                     window.open(`https://suiscan.xyz/testnet/tx/${digest}`, '_blank');
@@ -1046,12 +1046,12 @@ function TokenManagement() {
                   
                 } catch (error) {
                   console.error('🚨 Transaction hatası:', error);
-                  alert(`❌ Transaction başarısız:\n\n${error}\n\nAnkr RPC problemi olabilir.`);
+                  alert(`❌ Transaction başarısız:\n\n${error}\n\nSui Official RPC problemi olabilir.`);
                 }
               }}
               className="w-full bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition-colors font-medium"
             >
-              🧪 Gerçek Transaction Test (Ankr API)
+              🧪 Gerçek Transaction Test (Sui Official)
             </button>
             
             <button 
