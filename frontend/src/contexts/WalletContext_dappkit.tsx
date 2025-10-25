@@ -12,13 +12,73 @@ import {
   useDisconnectWallet,
   useWallets,
 } from '@mysten/dapp-kit';
-import { getFullnodeUrl } from '@mysten/sui/client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-// Network konfigürasyonu
+// Dynamic RPC Provider Selection with CORS fallback
+const getRpcUrl = (network: 'devnet' | 'testnet' | 'mainnet') => {
+  const provider = import.meta.env.VITE_RPC_PROVIDER || 'allthatnode';
+  
+  switch (provider) {
+    case 'quicknode':
+      const quicknodeKey = import.meta.env.VITE_QUICKNODE_API_KEY;
+      const quicknodeEndpoint = import.meta.env.VITE_QUICKNODE_ENDPOINT;
+      if (quicknodeKey && quicknodeEndpoint) {
+        return `${quicknodeEndpoint}/${quicknodeKey}/`;
+      }
+      // Fallback to AllThatNode
+      console.warn('⚠️ QuickNode config eksik, AllThatNode fallback');
+      return `https://sui-${network}-rpc.allthatnode.com`;
+    
+    case 'ankr':
+      const ankrKey = import.meta.env.VITE_ANKR_API_KEY;
+      if (ankrKey) {
+        const ankrUrl = network === 'mainnet' 
+          ? `https://rpc.ankr.com/sui/${ankrKey}`
+          : `https://rpc.ankr.com/sui_${network}/${ankrKey}`;
+        console.log('🔗 Ankr RPC URL:', ankrUrl);
+        return ankrUrl;
+      }
+      // Fallback to AllThatNode
+      console.warn('⚠️ Ankr API key eksik, AllThatNode fallback');
+      return `https://sui-${network}-rpc.allthatnode.com`;
+    
+    case 'allthatnode':
+    default:
+      console.log('🔗 AllThatNode RPC URL:', `https://sui-${network}-rpc.allthatnode.com`);
+      return `https://sui-${network}-rpc.allthatnode.com`;
+  }
+};
+
+// Network konfigürasyonu - Dynamic RPC Provider
 const { networkConfig } = createNetworkConfig({
-  testnet: { url: getFullnodeUrl('testnet') },
-  mainnet: { url: getFullnodeUrl('mainnet') },
+  devnet: { 
+    url: getRpcUrl('devnet'),
+    variables: {
+      faucetUrl: 'https://faucet.devnet.sui.io/gas',
+      explorerUrl: 'https://suiscan.xyz/devnet',
+    }
+  },
+  testnet: { 
+    url: getRpcUrl('testnet'),
+    variables: {
+      faucetUrl: 'https://faucet.testnet.sui.io/gas',
+      explorerUrl: 'https://suiscan.xyz/testnet',
+    }
+  },
+  mainnet: { 
+    url: getRpcUrl('mainnet'),
+    variables: {
+      explorerUrl: 'https://suiscan.xyz/mainnet',
+    }
+  },
+});
+
+// Debug: RPC Provider bilgilerini logla
+console.log('🌐 SuiHolar RPC Configuration:', {
+  provider: import.meta.env.VITE_RPC_PROVIDER || 'allthatnode',
+  testnetUrl: getRpcUrl('testnet'),
+  network: import.meta.env.VITE_NETWORK || 'testnet',
+  apiKey: import.meta.env.VITE_ANKR_API_KEY ? '✅ Ankr API Key Active' : '❌ No API Key'
 });
 
 // Query client

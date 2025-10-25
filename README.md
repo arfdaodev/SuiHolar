@@ -21,6 +21,9 @@
 - 📄 **Makale Token'ları**: Araştırma çıktıları için NFT-benzeri token'lar
 - 📊 Kullanıcı tanımlı token arzları
 - 💡 Proje başına özelleştirilebilir token ekonomisi
+- ⚡ **Gerçek Blockchain İşlemleri**: Sui Devnet üzerinde canlı token mint
+- 🔄 **Live Token Tracking**: Gerçek zamanlı bakiye görüntüleme
+- 💰 **Contract Address**: `0x9df204865518cfcd6a121387c6b309bbd83569fce652b2ce398432e236157288`
 
 ### 🎨 Modern UI/UX
 - ⚡ React 18 + TypeScript
@@ -37,10 +40,12 @@
 - **Tailwind CSS** - Utility-first CSS framework
 
 ### Blockchain
-- **Sui Blockchain** - Layer 1 blockchain
+- **Sui Blockchain** - Layer 1 blockchain (Devnet)
 - **@mysten/dapp-kit** - Sui dApp geliştirme kiti
-- **@mysten/sui** - Sui JavaScript SDK
+- **@mysten/sui** - Sui JavaScript SDK  
 - **Move Language** - Smart contract geliştirme
+- **Live Contract**: Devnet üzerinde deploy edilmiş Move contract'ları
+- **Real Token Minting**: Gerçek blockchain üzerinde token mint işlemleri
 
 ### Cüzdan Entegrasyonu
 - **@mysten/wallet-adapter** - Multi-wallet desteği
@@ -95,11 +100,20 @@ http://localhost:3000
     - Yönetim token arzı
     - Makale token adı
     - Makale token arzı
+- **Blockchain İşlemi**: Form gönderildiğinde gerçek Move contract çağrılır
+- **Token Mint**: Token'lar otomatik olarak cüzdanınıza mint edilir
 
-### 3. Dashboard
+### 3. Token Yönetimi
+- "Token Yönetimi" sekmesinde bakiyelerinizi görün
+- Gerçek SUI bakiyenizi kontrol edin
+- Mint edilen PAPER ve Article token'larınızı takip edin
+- Devnet faucet'ten test SUI alın
+
+### 4. Dashboard
 - Tüm projelerinizi görüntüleyin
 - Proje istatistiklerini takip edin
 - Token bilgilerini kontrol edin
+- Blockchain transaction hash'lerini görün
 
 ## 🔮 Özellik Örnekleri
 

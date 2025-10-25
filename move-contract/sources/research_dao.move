@@ -4,10 +4,11 @@ module research_dao::research_dao {
     use sui::tx_context::{Self, TxContext};
     use std::string::{Self, String};
     use sui::clock::{Self, Clock};
-    use sui::coin::{Self, Coin};
+    use sui::coin::{Self, Coin, TreasuryCap};
     use sui::sui::SUI;
     use sui::balance::{Self, Balance};
     use sui::event;
+    use research_dao::simple_token;
 
     // ===== Errors =====
     const EInsufficientFunds: u64 = 0;
@@ -29,6 +30,12 @@ module research_dao::research_dao {
         created_at: u64,
         is_funded: bool,
         funding_balance: Balance<SUI>,
+        // Token bilgileri
+        governance_token_amount: u64,
+        article_token_amount: u64,
+        governance_token_name: String,
+        article_token_name: String,
+        tokens_minted: bool,
     }
 
     /// DAO yönetimi için ana yapı
@@ -71,46 +78,70 @@ module research_dao::research_dao {
 
     // ===== Public Functions =====
 
-    /// Yeni araştırma projesi oluştur
-    public entry fun create_project(
+    /// Yeni araştırma projesi oluştur ve token'ları mint et
+    public entry fun create_project_with_tokens(
         dao: &mut ResearchDAO,
+        treasury_cap: &mut TreasuryCap<simple_token::SIMPLE_TOKEN>,
         title: vector<u8>,
         description: vector<u8>,
         funding_goal: u64,
         timeline_months: u64,
+        governance_token_amount: u64,
+        article_token_amount: u64,
+        governance_token_name: vector<u8>,
+        article_token_name: vector<u8>,
         clock: &Clock,
         ctx: &mut TxContext
     ) {
         let project_id = object::new(ctx);
         let project_id_copy = object::uid_to_inner(&project_id);
+        let sender = tx_context::sender(ctx);
         
         let project = Project {
             id: project_id,
             title: string::utf8(title),
             description: string::utf8(description),
-            owner: tx_context::sender(ctx),
+            owner: sender,
             funding_goal,
             current_funding: 0,
             timeline_months,
             created_at: clock::timestamp_ms(clock),
             is_funded: false,
             funding_balance: balance::zero(),
+            governance_token_amount,
+            article_token_amount,
+            governance_token_name: string::utf8(governance_token_name),
+            article_token_name: string::utf8(article_token_name),
+            tokens_minted: true,
         };
 
         // DAO istatistiklerini güncelle
         dao.total_projects = dao.total_projects + 1;
 
+        // Token'ları mint et
+        simple_token::mint_project_tokens(
+            treasury_cap,
+            governance_token_amount,
+            governance_token_name,
+            governance_token_name, // symbol olarak da aynı ismi kullan
+            article_token_amount,
+            article_token_name,
+            article_token_name, // symbol olarak da aynı ismi kullan
+            sender,
+            ctx
+        );
+
         // Event emit et
         event::emit(ProjectCreated {
             project_id: project_id_copy,
-            owner: tx_context::sender(ctx),
+            owner: sender,
             title: string::utf8(title),
             funding_goal,
             timeline_months,
         });
 
         // Projeyi gönderene transfer et
-        transfer::transfer(project, tx_context::sender(ctx));
+        transfer::transfer(project, sender);
     }
 
     /// Projeye fon sağla
@@ -165,7 +196,7 @@ module research_dao::research_dao {
     // ===== View Functions =====
 
     /// Proje bilgilerini getir
-    public fun get_project_info(project: &Project): (String, String, address, u64, u64, u64, bool) {
+    public fun get_project_info(project: &Project): (String, String, address, u64, u64, u64, bool, u64, u64, String, String) {
         (
             project.title,
             project.description,
@@ -173,7 +204,11 @@ module research_dao::research_dao {
             project.funding_goal,
             project.current_funding,
             project.timeline_months,
-            project.is_funded
+            project.is_funded,
+            project.governance_token_amount,
+            project.article_token_amount,
+            project.governance_token_name,
+            project.article_token_name
         )
     }
 
