@@ -158,8 +158,8 @@ Bu proje MIT lisansı altında lisanslanmıştır. Detaylar için [LICENSE](LICE
 
 Proje ile ilgili sorularınız için:
 - GitHub Issues
-- Twitter: [@suiholar]
-- Discord: [SuiHolar Community]
+- Twitter: @arfdao
+- Discord: 
 
 ---
 
