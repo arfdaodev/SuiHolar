@@ -68,11 +68,159 @@ function Navigation({ activeTab, setActiveTab }: {
   );
 }
 
+// IPFS Article Access Button Component
+function ArticleAccessButton({ project, userAddress }: { 
+  project: any; 
+  userAddress: string | null;
+}) {
+  const [isChecking, setIsChecking] = useState(false);
+  const [accessResult, setAccessResult] = useState<{
+    hasAccess: boolean;
+    balance: number;
+    requiredAmount: number;
+  } | null>(null);
+
+  const checkAccess = async () => {
+    if (!userAddress) return;
+    
+    setIsChecking(true);
+    try {
+      const { isPaperTokenHolder } = await import('./utils/tokenAccess');
+      const result = isPaperTokenHolder(
+        userAddress, 
+        project.id, 
+        project.articleMetadata?.minimumTokens || 1
+      );
+      setAccessResult(result);
+    } catch (error) {
+      console.error('Token access check error:', error);
+    } finally {
+      setIsChecking(false);
+    }
+  };
+
+  const openArticle = () => {
+    if (project.articleIPFSHash && accessResult?.hasAccess) {
+      const { getIPFSUrl } = require('./utils/ipfs');
+      const url = getIPFSUrl(project.articleIPFSHash);
+      window.open(url, '_blank');
+    }
+  };
+
+  useEffect(() => {
+    if (userAddress && project.articleIPFSHash) {
+      checkAccess();
+    }
+  }, [userAddress, project.id]);
+
+  if (!project.articleIPFSHash) return null;
+
+  return (
+    <div className="w-full">
+      {isChecking ? (
+        <button 
+          disabled 
+          className="w-full bg-gray-400 text-white py-2 px-3 rounded-lg text-sm font-medium flex items-center justify-center gap-2"
+        >
+          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+          Kontrol ediliyor...
+        </button>
+      ) : accessResult?.hasAccess ? (
+        <button 
+          onClick={openArticle}
+          className="w-full bg-purple-600 text-white py-2 px-3 rounded-lg text-sm font-medium hover:bg-purple-700 transition-colors flex items-center justify-center gap-2"
+        >
+          📄 Makaleyi Aç (IPFS)
+        </button>
+      ) : (
+        <div className="w-full bg-red-50 border border-red-200 rounded-lg p-2">
+          <p className="text-xs text-red-600 text-center">
+            🔒 Makale erişimi için {project.articleMetadata?.minimumTokens || 1} $PAPER{project.governanceTokenName} token gerekli
+          </p>
+          <p className="text-xs text-red-500 text-center mt-1">
+            Mevcut: {accessResult?.balance || 0} token
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Compact version for list view
+function ArticleAccessButtonCompact({ project, userAddress }: { 
+  project: any; 
+  userAddress: string | null;
+}) {
+  const [isChecking, setIsChecking] = useState(false);
+  const [accessResult, setAccessResult] = useState<{
+    hasAccess: boolean;
+    balance: number;
+    requiredAmount: number;
+  } | null>(null);
+
+  const checkAccess = async () => {
+    if (!userAddress) return;
+    
+    setIsChecking(true);
+    try {
+      const { isPaperTokenHolder } = await import('./utils/tokenAccess');
+      const result = isPaperTokenHolder(
+        userAddress, 
+        project.id, 
+        project.articleMetadata?.minimumTokens || 1
+      );
+      setAccessResult(result);
+    } catch (error) {
+      console.error('Token access check error:', error);
+    } finally {
+      setIsChecking(false);
+    }
+  };
+
+  const openArticle = () => {
+    if (project.articleIPFSHash && accessResult?.hasAccess) {
+      const { getIPFSUrl } = require('./utils/ipfs');
+      const url = getIPFSUrl(project.articleIPFSHash);
+      window.open(url, '_blank');
+    }
+  };
+
+  useEffect(() => {
+    if (userAddress && project.articleIPFSHash) {
+      checkAccess();
+    }
+  }, [userAddress, project.id]);
+
+  if (!project.articleIPFSHash) return null;
+
+  return (
+    <div>
+      {isChecking ? (
+        <span className="text-xs text-gray-500">Kontrol ediliyor...</span>
+      ) : accessResult?.hasAccess ? (
+        <button 
+          onClick={openArticle}
+          className="text-xs text-purple-600 hover:text-purple-700 font-medium"
+        >
+          📄 Makale (IPFS)
+        </button>
+      ) : (
+        <span className="text-xs text-red-500">
+          🔒 {project.articleMetadata?.minimumTokens || 1} $PAPER gerekli
+        </span>
+      )}
+    </div>
+  );
+}
+
 function Dashboard({ setActiveTab }: { 
   setActiveTab: (tab: 'dashboard' | 'create' | 'tokens') => void 
 }) {
   const { isConnected, address } = useWalletState();
   const [projects, setProjects] = useState<any[]>([]);
+  const [sortBy, setSortBy] = useState<'date' | 'funding' | 'name'>('date');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
   // Projeleri localStorage'dan yükle
   useEffect(() => {
@@ -83,6 +231,34 @@ function Dashboard({ setActiveTab }: {
       setProjects(userProjects);
     }
   }, [isConnected, address]);
+
+  // Projeleri sırala
+  const sortedProjects = [...projects].sort((a, b) => {
+    let aValue, bValue;
+    
+    switch (sortBy) {
+      case 'date':
+        aValue = new Date(a.createdAt).getTime();
+        bValue = new Date(b.createdAt).getTime();
+        break;
+      case 'funding':
+        aValue = parseFloat(a.fundingGoal) || 0;
+        bValue = parseFloat(b.fundingGoal) || 0;
+        break;
+      case 'name':
+        aValue = a.title.toLowerCase();
+        bValue = b.title.toLowerCase();
+        break;
+      default:
+        return 0;
+    }
+    
+    if (sortOrder === 'asc') {
+      return aValue > bValue ? 1 : -1;
+    } else {
+      return aValue < bValue ? 1 : -1;
+    }
+  });
   
   return (
     <div className="p-6">
@@ -132,62 +308,251 @@ function Dashboard({ setActiveTab }: {
           {/* Tüm Projeler Listesi */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200">
             <div className="px-6 py-4 border-b border-gray-200">
-              <h3 className="text-xl font-semibold text-gray-900">Tüm Projelerim</h3>
-              <p className="text-sm text-gray-600">Oluşturduğunuz araştırma projelerinin listesi</p>
+              <div className="flex justify-between items-start mb-4">
+                <div>
+                  <h3 className="text-xl font-semibold text-gray-900">Tüm Projelerim</h3>
+                  <p className="text-sm text-gray-600">Oluşturduğunuz araştırma projelerinin listesi</p>
+                </div>
+                
+                {/* Sıralama ve Görünüm Kontrolleri */}
+                <div className="flex items-center gap-4">
+                  {/* Görünüm Modu */}
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setViewMode('grid')}
+                      className={`p-2 rounded-md transition-colors ${
+                        viewMode === 'grid' 
+                          ? 'bg-blue-100 text-blue-600' 
+                          : 'text-gray-400 hover:text-gray-600'
+                      }`}
+                      title="Kart Görünümü"
+                    >
+                      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M3 4a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 12a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H4a1 1 0 01-1-1v-4zM11 4a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1V4zM11 12a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z" clipRule="evenodd" />
+                      </svg>
+                    </button>
+                    <button
+                      onClick={() => setViewMode('list')}
+                      className={`p-2 rounded-md transition-colors ${
+                        viewMode === 'list' 
+                          ? 'bg-blue-100 text-blue-600' 
+                          : 'text-gray-400 hover:text-gray-600'
+                      }`}
+                      title="Liste Görünümü"
+                    >
+                      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M3 4a1 1 0 000 2h14a1 1 0 100-2H3zM3 8a1 1 0 000 2h14a1 1 0 100-2H3zM3 12a1 1 0 100 2h14a1 1 0 100-2H3z" clipRule="evenodd" />
+                      </svg>
+                    </button>
+                  </div>
+                  
+                  {/* Sıralama */}
+                  <div className="flex items-center gap-2">
+                    <label className="text-sm font-medium text-gray-700">Sırala:</label>
+                    <select
+                      value={sortBy}
+                      onChange={(e) => setSortBy(e.target.value as 'date' | 'funding' | 'name')}
+                      className="text-sm border border-gray-300 rounded-md px-3 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="date">📅 Tarih</option>
+                      <option value="funding">💰 Yatırım</option>
+                      <option value="name">📝 İsim</option>
+                    </select>
+                    <button
+                      onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+                      className="p-1 text-gray-400 hover:text-gray-600 transition-colors"
+                      title={sortOrder === 'asc' ? 'Azalan sıralama' : 'Artan sıralama'}
+                    >
+                      {sortOrder === 'asc' ? (
+                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clipRule="evenodd" />
+                        </svg>
+                      ) : (
+                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                        </svg>
+                      )}
+                    </button>
+                  </div>
+                </div>
+              </div>
             </div>
             
             {projects.length > 0 ? (
-              <div className="divide-y divide-gray-200">
-                {projects.map((project) => (
-                  <div key={project.id} className="px-6 py-4 hover:bg-gray-50 transition-colors">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <h4 className="font-semibold text-gray-900 mb-1">{project.title}</h4>
-                        <p className="text-sm text-gray-600 mb-2 line-clamp-2">{project.description}</p>
+              viewMode === 'grid' ? (
+                /* Grid Görünümü - Büyük Kartlar */
+                <div className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {sortedProjects.map((project) => (
+                    <div key={project.id} className="bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-shadow overflow-hidden">
+                      {/* Büyük Proje Görseli */}
+                      <div className="aspect-video w-full bg-gradient-to-br from-blue-50 to-purple-50 relative overflow-hidden">
+                        {project.projectImage ? (
+                          <img 
+                            src={project.projectImage} 
+                            alt={project.title}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <span className="text-6xl opacity-60">🔬</span>
+                          </div>
+                        )}
                         
-                        {/* Proje Detayları */}
-                        <div className="flex flex-wrap gap-4 text-xs text-gray-500">
-                          <span>💰 Hedef: {project.fundingGoal} SUI</span>
-                          <span>📅 Süre: {formatTimeline(project.timeline)}</span>
-                          <span>📅 Oluşturulma: {new Date(project.createdAt).toLocaleDateString('tr-TR')}</span>
+                        {/* Durum Badge */}
+                        <div className="absolute top-3 right-3">
+                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 backdrop-blur-sm">
+                            📊 Aktif
+                          </span>
+                        </div>
+                      </div>
+                      
+                      {/* Kart İçeriği */}
+                      <div className="p-4">
+                        <h4 className="font-bold text-lg text-gray-900 mb-2 line-clamp-1">{project.title}</h4>
+                        <p className="text-sm text-gray-600 mb-4 line-clamp-3">{project.description}</p>
+                        
+                        {/* Proje Metrikleri */}
+                        <div className="space-y-2 mb-4">
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm text-gray-500">💰 Hedef Yatırım</span>
+                            <span className="text-sm font-semibold text-blue-600">{project.fundingGoal} SUI</span>
+                          </div>
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm text-gray-500">📅 Süre</span>
+                            <span className="text-sm font-medium">{formatTimeline(project.timeline)}</span>
+                          </div>
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm text-gray-500">📅 Oluşturulma</span>
+                            <span className="text-sm">{new Date(project.createdAt).toLocaleDateString('tr-TR')}</span>
+                          </div>
                         </div>
                         
                         {/* Token Bilgileri */}
                         {project.governanceTokenName && (
-                          <div className="mt-2 flex flex-wrap gap-2">
-                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                              🏛️ $PAPER{project.governanceTokenName} ({project.governanceTokenSupply?.toLocaleString()})
-                            </span>
-                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                              📄 {project.articleTokenName} ({project.articleTokenSupply})
-                            </span>
+                          <div className="mb-4 space-y-1">
+                            <div className="flex items-center justify-between p-2 bg-blue-50 rounded-lg">
+                              <span className="text-xs font-medium text-blue-700">🏛️ $PAPER{project.governanceTokenName}</span>
+                              <span className="text-xs text-blue-600">{project.governanceTokenSupply?.toLocaleString()}</span>
+                            </div>
+                            <div className="flex items-center justify-between p-2 bg-green-50 rounded-lg">
+                              <span className="text-xs font-medium text-green-700">📄 {project.articleTokenName}</span>
+                              <span className="text-xs text-green-600">{project.articleTokenSupply}</span>
+                            </div>
                           </div>
                         )}
-                      </div>
-                      
-                      {/* Durum ve Aksiyonlar */}
-                      <div className="ml-4 text-right">
-                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                          📊 Aktif
-                        </span>
-                        <div className="mt-2 space-x-2">
-                          <button className="text-xs text-blue-600 hover:text-blue-700 font-medium">
-                            Detaylar
-                          </button>
-                          <button className="text-xs text-green-600 hover:text-green-700 font-medium">
-                            Fonla
-                          </button>
+                        
+                        {/* Aksiyon Butonları */}
+                        <div className="space-y-2">
+                          <div className="flex gap-2">
+                            <button className="flex-1 bg-blue-600 text-white py-2 px-3 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors">
+                              Detaylar
+                            </button>
+                            <button className="flex-1 bg-green-600 text-white py-2 px-3 rounded-lg text-sm font-medium hover:bg-green-700 transition-colors">
+                              Fonla
+                            </button>
+                          </div>
+                          
+                          {/* IPFS Article Access */}
+                          {project.articleIPFSHash && (
+                            <ArticleAccessButton 
+                              project={project}
+                              userAddress={address}
+                            />
+                          )}
                         </div>
+                        
+                        {/* Transaction Info */}
                         {project.transactionDigest && (
-                          <p className="text-xs text-gray-400 mt-1">
+                          <p className="text-xs text-gray-400 mt-2 text-center">
                             TX: {project.transactionDigest.slice(0, 8)}...
                           </p>
                         )}
                       </div>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              ) : (
+                /* Liste Görünümü - Kompakt */
+                <div className="divide-y divide-gray-200">
+                  {sortedProjects.map((project) => (
+                    <div key={project.id} className="px-6 py-4 hover:bg-gray-50 transition-colors">
+                      <div className="flex items-start justify-between">
+                        <div className="flex gap-4 flex-1">
+                          {/* Küçük Proje Görseli */}
+                          {project.projectImage ? (
+                            <div className="flex-shrink-0">
+                              <img 
+                                src={project.projectImage} 
+                                alt={project.title}
+                                className="w-16 h-16 object-cover rounded-lg border border-gray-200 shadow-sm"
+                              />
+                            </div>
+                          ) : (
+                            <div className="flex-shrink-0 w-16 h-16 bg-gradient-to-br from-blue-100 to-purple-100 rounded-lg border border-gray-200 flex items-center justify-center">
+                              <span className="text-xl">🔬</span>
+                            </div>
+                          )}
+                          
+                          {/* Proje Bilgileri */}
+                          <div className="flex-1">
+                            <h4 className="font-semibold text-gray-900 mb-1">{project.title}</h4>
+                            <p className="text-sm text-gray-600 mb-2 line-clamp-2">{project.description}</p>
+                            
+                            {/* Proje Detayları */}
+                            <div className="flex flex-wrap gap-4 text-xs text-gray-500">
+                              <span>💰 Hedef: {project.fundingGoal} SUI</span>
+                              <span>📅 Süre: {formatTimeline(project.timeline)}</span>
+                              <span>📅 Oluşturulma: {new Date(project.createdAt).toLocaleDateString('tr-TR')}</span>
+                            </div>
+                            
+                            {/* Token Bilgileri */}
+                            {project.governanceTokenName && (
+                              <div className="mt-2 flex flex-wrap gap-2">
+                                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                  🏛️ $PAPER{project.governanceTokenName} ({project.governanceTokenSupply?.toLocaleString()})
+                                </span>
+                                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                  📄 {project.articleTokenName} ({project.articleTokenSupply})
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                        
+                        {/* Durum ve Aksiyonlar */}
+                        <div className="ml-4 text-right">
+                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                            📊 Aktif
+                          </span>
+                          <div className="mt-2 space-x-2">
+                            <button className="text-xs text-blue-600 hover:text-blue-700 font-medium">
+                              Detaylar
+                            </button>
+                            <button className="text-xs text-green-600 hover:text-green-700 font-medium">
+                              Fonla
+                            </button>
+                          </div>
+                          
+                          {/* IPFS Article Access - Compact */}
+                          {project.articleIPFSHash && (
+                            <div className="mt-2">
+                              <ArticleAccessButtonCompact 
+                                project={project}
+                                userAddress={address}
+                              />
+                            </div>
+                          )}
+                          {project.transactionDigest && (
+                            <p className="text-xs text-gray-400 mt-1">
+                              TX: {project.transactionDigest.slice(0, 8)}...
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )
             ) : (
               <div className="px-6 py-12 text-center">
                 <div className="text-gray-400 mb-4">
@@ -447,6 +812,22 @@ function CreateProject() {
     articleTokenSupply: ''
   });
   
+  // Image upload state
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  
+  // Article upload state
+  const [selectedArticle, setSelectedArticle] = useState<File | null>(null);
+  const [isUploadingArticle, setIsUploadingArticle] = useState(false);
+  const [articleUploadProgress, setArticleUploadProgress] = useState(0);
+  const [articleIPFSHash, setArticleIPFSHash] = useState<string | null>(null);
+  const [articleMetadata, setArticleMetadata] = useState({
+    title: '',
+    description: '',
+    minimumTokens: 1
+  });
+  
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -454,6 +835,121 @@ function CreateProject() {
     setFormData(prev => ({
       ...prev,
       [name]: value
+    }));
+  };
+
+  // Image upload handlers
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Dosya validasyonu
+    if (!file.type.startsWith('image/')) {
+      alert('Lütfen sadece resim dosyası seçin');
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) { // 5MB limit
+      alert('Dosya boyutu 5MB\'dan küçük olmalı');
+      return;
+    }
+
+    setIsUploadingImage(true);
+    setUploadProgress(0);
+
+    try {
+      const reader = new FileReader();
+      
+      reader.onprogress = (event) => {
+        if (event.lengthComputable) {
+          const progress = Math.round((event.loaded / event.total) * 100);
+          setUploadProgress(progress);
+        }
+      };
+
+      reader.onload = (event) => {
+        const result = event.target?.result as string;
+        setImagePreview(result);
+        setIsUploadingImage(false);
+        setUploadProgress(100);
+      };
+
+      reader.onerror = () => {
+        alert('Dosya yüklenirken hata oluştu');
+        setIsUploadingImage(false);
+        setUploadProgress(0);
+      };
+
+      reader.readAsDataURL(file);
+    } catch (error) {
+      console.error('Image upload error:', error);
+      alert('Dosya yüklenirken hata oluştu');
+      setIsUploadingImage(false);
+      setUploadProgress(0);
+    }
+  };
+
+  const removeImage = () => {
+    setImagePreview(null);
+    setUploadProgress(0);
+  };
+
+  // Article upload handlers
+  const handleArticleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Dosya validasyonu - IPFS util kullan
+    const { validateFileForIPFS } = await import('./utils/ipfs');
+    const validation = validateFileForIPFS(file);
+    
+    if (!validation.isValid) {
+      alert(validation.error);
+      return;
+    }
+
+    setSelectedArticle(file);
+    setIsUploadingArticle(true);
+    setArticleUploadProgress(0);
+
+    try {
+      console.log('📄 Makale IPFS\'e yükleniyor...', file.name);
+      
+      // IPFS'e upload et
+      const { uploadToIPFS } = await import('./utils/ipfs');
+      const result = await uploadToIPFS(file);
+      
+      setArticleIPFSHash(result.hash);
+      setArticleUploadProgress(100);
+      setIsUploadingArticle(false);
+      
+      console.log('✅ Makale IPFS\'e yüklendi:', result);
+      alert(`✅ Makale başarıyla IPFS'e yüklendi!\nHash: ${result.hash}`);
+      
+    } catch (error) {
+      console.error('❌ Article IPFS upload hatası:', error);
+      alert('Makale yüklenirken hata oluştu: ' + error);
+      setIsUploadingArticle(false);
+      setArticleUploadProgress(0);
+      setSelectedArticle(null);
+    }
+  };
+
+  const removeArticle = () => {
+    setSelectedArticle(null);
+    setArticleIPFSHash(null);
+    setArticleUploadProgress(0);
+    setArticleMetadata({
+      title: '',
+      description: '',
+      minimumTokens: 1
+    });
+  };
+
+  const handleArticleMetadataChange = (field: string, value: string | number) => {
+    setArticleMetadata(prev => ({
+      ...prev,
+      [field]: value
     }));
   };
 
@@ -486,7 +982,18 @@ function CreateProject() {
         governanceTokenName: formData.governanceTokenName.trim(),
         governanceTokenSupply: parseInt(formData.governanceTokenSupply),
         articleTokenName: formData.articleTokenName.trim(),
-        articleTokenSupply: parseInt(formData.articleTokenSupply)
+        articleTokenSupply: parseInt(formData.articleTokenSupply),
+        projectImage: imagePreview, // Image preview'ı ekle
+        // Article IPFS data
+        articleIPFSHash: articleIPFSHash,
+        articleMetadata: selectedArticle ? {
+          title: articleMetadata.title || formData.title,
+          description: articleMetadata.description || formData.description,
+          fileName: selectedArticle.name,
+          fileSize: selectedArticle.size,
+          fileType: selectedArticle.type,
+          minimumTokens: articleMetadata.minimumTokens
+        } : null
       });
 
       if (result?.success) {
@@ -513,6 +1020,20 @@ function CreateProject() {
           governanceTokenSupply: '',
           articleTokenName: '',
           articleTokenSupply: ''
+        });
+        
+        // Image state'lerini temizle
+        setImagePreview(null);
+        setUploadProgress(0);
+        
+        // Article state'lerini temizle
+        setSelectedArticle(null);
+        setArticleIPFSHash(null);
+        setArticleUploadProgress(0);
+        setArticleMetadata({
+          title: '',
+          description: '',
+          minimumTokens: 1
         });
         
         // Dashboard'ı yenile için delay
@@ -596,6 +1117,226 @@ function CreateProject() {
               placeholder="Projenizi detaylı bir şekilde açıklayın"
               required
             />
+          </div>
+
+          {/* Proje Görseli Upload */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              📸 Proje Görseli
+            </label>
+            <div className="space-y-3">
+              {/* Image Preview */}
+              {imagePreview ? (
+                <div className="relative inline-block">
+                  <img 
+                    src={imagePreview} 
+                    alt="Proje görseli önizleme" 
+                    className="w-32 h-32 object-cover rounded-lg border-2 border-gray-200 shadow-sm"
+                  />
+                  <button
+                    type="button"
+                    onClick={removeImage}
+                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600 transition-colors"
+                    disabled={isUploadingImage}
+                  >
+                    ✕
+                  </button>
+                </div>
+              ) : (
+                /* Upload Area with Loading State */
+                <div className="relative">
+                  <label className={`flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg ${
+                    isUploadingImage ? 'cursor-not-allowed bg-gray-100' : 'cursor-pointer bg-gray-50 hover:bg-gray-100'
+                  } transition-colors`}>
+                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                      {isUploadingImage ? (
+                        /* Loading State */
+                        <>
+                          <div className="w-8 h-8 mb-2 relative">
+                            <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                          </div>
+                          <p className="mb-1 text-xs text-blue-600 font-semibold">
+                            Yükleniyor... {uploadProgress}%
+                          </p>
+                          <div className="w-24 h-1 bg-gray-200 rounded-full overflow-hidden">
+                            <div 
+                              className="h-full bg-blue-500 transition-all duration-300"
+                              style={{ width: `${uploadProgress}%` }}
+                            ></div>
+                          </div>
+                        </>
+                      ) : (
+                        /* Normal State */
+                        <>
+                          <svg className="w-8 h-8 mb-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                          </svg>
+                          <p className="mb-1 text-xs text-gray-500">
+                            <span className="font-semibold">Tıklayın</span> veya sürükleyin
+                          </p>
+                          <p className="text-xs text-gray-500">PNG, JPG, GIF (maks. 5MB)</p>
+                        </>
+                      )}
+                    </div>
+                    <input 
+                      type="file" 
+                      className="hidden" 
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                      disabled={isUploadingImage}
+                    />
+                  </label>
+                </div>
+              )}
+              <p className="text-xs text-gray-500">
+                💡 Projenizi görsel olarak temsil eden bir resim yükleyin (opsiyonel)
+              </p>
+            </div>
+          </div>
+
+          {/* Makale Upload (IPFS) */}
+          <div className="border-t border-gray-200 pt-6">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              📄 Araştırma Makalesi (IPFS)
+            </label>
+            <div className="space-y-4">
+              {/* Article Upload Area */}
+              {selectedArticle ? (
+                <div className="border border-green-200 bg-green-50 rounded-lg p-4">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-green-600">📄</span>
+                        <span className="font-semibold text-green-800">{selectedArticle.name}</span>
+                        {articleIPFSHash && (
+                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                            ✅ IPFS'e Yüklendi
+                          </span>
+                        )}
+                      </div>
+                      
+                      <div className="text-sm text-green-700 space-y-1">
+                        <p>📁 Boyut: {(selectedArticle.size / 1024 / 1024).toFixed(2)} MB</p>
+                        <p>🗂️ Tip: {selectedArticle.type}</p>
+                        {articleIPFSHash && (
+                          <p className="font-mono text-xs break-all">
+                            🔗 IPFS Hash: {articleIPFSHash}
+                          </p>
+                        )}
+                      </div>
+                      
+                      {/* Progress Bar */}
+                      {isUploadingArticle && (
+                        <div className="mt-2">
+                          <div className="flex justify-between text-xs text-green-600 mb-1">
+                            <span>IPFS'e yükleniyor...</span>
+                            <span>{articleUploadProgress}%</span>
+                          </div>
+                          <div className="w-full h-2 bg-green-200 rounded-full overflow-hidden">
+                            <div 
+                              className="h-full bg-green-500 transition-all duration-300"
+                              style={{ width: `${articleUploadProgress}%` }}
+                            ></div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    
+                    <button
+                      type="button"
+                      onClick={removeArticle}
+                      className="ml-4 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600 transition-colors"
+                      disabled={isUploadingArticle}
+                    >
+                      ✕
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                /* Upload Area */
+                <label className={`flex flex-col items-center justify-center w-full h-24 border-2 border-gray-300 border-dashed rounded-lg ${
+                  isUploadingArticle ? 'cursor-not-allowed bg-gray-100' : 'cursor-pointer bg-gray-50 hover:bg-gray-100'
+                } transition-colors`}>
+                  <div className="flex flex-col items-center justify-center pt-3 pb-3">
+                    {isUploadingArticle ? (
+                      <>
+                        <div className="w-6 h-6 mb-1 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                        <p className="text-xs text-blue-600 font-semibold">IPFS'e yükleniyor...</p>
+                      </>
+                    ) : (
+                      <>
+                        <svg className="w-6 h-6 mb-1 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                        <p className="text-xs text-gray-500">
+                          <span className="font-semibold">PDF, Word, Markdown</span> dosyası seçin
+                        </p>
+                      </>
+                    )}
+                  </div>
+                  <input 
+                    type="file" 
+                    className="hidden" 
+                    accept=".pdf,.doc,.docx,.txt,.md,.zip"
+                    onChange={handleArticleUpload}
+                    disabled={isUploadingArticle}
+                  />
+                </label>
+              )}
+              
+              {/* Article Metadata */}
+              {selectedArticle && (
+                <div className="space-y-3 border border-gray-200 rounded-lg p-4 bg-gray-50">
+                  <h4 className="font-medium text-gray-900">📋 Makale Erişim Ayarları</h4>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Makale Başlığı
+                    </label>
+                    <input
+                      type="text"
+                      value={articleMetadata.title}
+                      onChange={(e) => handleArticleMetadataChange('title', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="Boş bırakılırsa proje başlığı kullanılır"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Makale Açıklaması
+                    </label>
+                    <textarea
+                      value={articleMetadata.description}
+                      onChange={(e) => handleArticleMetadataChange('description', e.target.value)}
+                      rows={2}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="Boş bırakılırsa proje açıklaması kullanılır"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      🎫 Minimum $PAPER Token Gereksinimi
+                    </label>
+                    <input
+                      type="number"
+                      min="1"
+                      value={articleMetadata.minimumTokens}
+                      onChange={(e) => handleArticleMetadataChange('minimumTokens', parseInt(e.target.value))}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">
+                      Bu makaleye erişmek için gerekli minimum $PAPER{formData.governanceTokenName} token miktarı
+                    </p>
+                  </div>
+                </div>
+              )}
+              
+              <p className="text-xs text-gray-500">
+                🔒 Yüklenen makale IPFS'te saklanır ve sadece $PAPER token holder'ları erişebilir
+              </p>
+            </div>
           </div>
           
           <div>

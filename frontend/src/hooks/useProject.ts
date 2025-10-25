@@ -17,6 +17,16 @@ export function useCreateProject() {
     governanceTokenSupply: number;
     articleTokenName: string;
     articleTokenSupply: number;
+    projectImage?: string | null; // Base64 image data
+    articleIPFSHash?: string | null; // IPFS hash for uploaded article
+    articleMetadata?: {
+      title: string;
+      description: string;
+      fileName: string;
+      fileSize: number;
+      fileType: string;
+      minimumTokens: number;
+    } | null;
   }) => {
     console.log('🚀 createProject başlatıldı:', { projectData, address, hasClient: !!suiClient });
     
@@ -145,6 +155,10 @@ export function useCreateProject() {
           governanceTokenSupply: projectData.governanceTokenSupply,
           articleTokenName: projectData.articleTokenName,
           articleTokenSupply: projectData.articleTokenSupply,
+          projectImage: projectData.projectImage, // Image Base64 data
+          // IPFS Article data
+          articleIPFSHash: projectData.articleIPFSHash,
+          articleMetadata: projectData.articleMetadata,
           owner: address,
           createdAt: Date.now(),
           currentFunding: 0,
