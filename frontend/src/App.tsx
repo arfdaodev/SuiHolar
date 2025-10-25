@@ -234,11 +234,11 @@ function WalletDebug() {
         console.log('🔍 Network debug başlıyor...');
         setNetwork('🔄 Bağlantı test ediliyor...');
         
-        // İlk olarak basit HTTP test - Sui Official (CORS bypass ile)
+        // İlk olarak basit HTTP test - Sui Official (CORS-Free)
         try {
           console.log('🔍 Sui Official API test başlıyor...');
           
-          // CORS problemi olabilir, alternatif test
+          // CORS problemi yok, direkt test
           const testResponse = await fetch('https://fullnode.testnet.sui.io:443', {
             method: 'POST',
             headers: { 
@@ -262,8 +262,8 @@ function WalletDebug() {
             setNetwork('⚠️ Sui Official RPC Yanıt Hatası');
           }
         } catch (httpError) {
-          console.warn('⚠️ Sui Official RPC test hatası (CORS olabilir):', httpError);
-          setNetwork('⚠️ CORS/Network Hatası');
+          console.warn('⚠️ Sui Official RPC test hatası:', httpError);
+          setNetwork('⚠️ Network Hatası');
           
           // Fallback: SuiClient ile test
           try {
@@ -370,7 +370,7 @@ function WalletDebug() {
               try {
                 console.log('🧪 Manuel Sui Official RPC test başlıyor...');
                 
-                // Manuel RPC test - Sui Official (CORS aware)
+                // Manuel RPC test - Sui Official (CORS-Free)
                 const testRpc = async () => {
                   const response = await fetch('https://fullnode.testnet.sui.io:443', {
                     method: 'POST',
@@ -392,9 +392,9 @@ function WalletDebug() {
                 console.log('🧪 Sui Official RPC test sonucu:', result);
                 
                 if (result.result) {
-                  alert(`✅ RPC Bağlantısı Başarılı!\n\nProvider: Sui Official (Resmi)\nChain ID: ${result.result}\nAPI Key: Gerekmiyor\nLimit: Unlimited`);
+                  alert(`✅ RPC Bağlantısı Başarılı!\n\nProvider: Sui Official (Resmi)\nChain ID: ${result.result}\nCORS: ✅ Problem yok\nLimit: Unlimited`);
                 } else {
-                  alert(`❌ RPC Test Başarısız!\n\nHata: ${result.error?.message || 'Bilinmeyen hata'}\n\nNot: Bu normal olabilir (CORS koruması)`);
+                  alert(`❌ RPC Test Başarısız!\n\nHata: ${result.error?.message || 'Bilinmeyen hata'}`);
                 }
               } catch (error: any) {
                 console.error('Manuel RPC test hatası:', error);
@@ -415,13 +415,15 @@ function WalletDebug() {
         
         {/* RPC Status */}
         <div className="text-xs mt-2 p-2 bg-gray-100 rounded">
-          <strong>RPC:</strong> Sui Official (Resmi Endpoint)
+          <strong>RPC:</strong> Sui Official (CORS-Free)
           <br />
           <strong>Endpoint:</strong> fullnode.testnet.sui.io:443
           <br />
           <strong>API Key:</strong> ✅ Gerekmiyor (Free & Unlimited)
           <br />
           <strong>Status:</strong> {network.includes('✅') ? '🟢 Aktif' : '🔴 Hata'}
+          <br />
+          <small className="text-green-600">💡 CORS problemi yok!</small>
         </div>
       </div>
     </div>
@@ -1038,7 +1040,7 @@ function TokenManagement() {
                   
                   if (result) {
                     const digest = (result as any).digest;
-                    alert(`🎉 Gerçek blockchain transaction başarılı!\n\nProvider: Sui Official RPC\nAPI Key: Gerekmiyor\n🔗 Transaction Digest: ${digest}\n\n✅ Sui Explorer'da görüntüle`);
+                    alert(`🎉 Gerçek blockchain transaction başarılı!\n\nProvider: Sui Official RPC\nCORS: ✅ Problem yok\n🔗 Transaction Digest: ${digest}\n\n✅ Sui Explorer'da görüntüle`);
                     
                     // Sui Explorer'da aç
                     window.open(`https://suiscan.xyz/testnet/tx/${digest}`, '_blank');

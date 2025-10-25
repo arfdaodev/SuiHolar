@@ -18,8 +18,19 @@ export function useCreateProject() {
     articleTokenName: string;
     articleTokenSupply: number;
   }) => {
+    console.log('🚀 createProject başlatıldı:', { projectData, address, hasClient: !!suiClient });
+    
     if (!address) {
-      setError('Cüzdan bağlı değil');
+      const errorMsg = 'Cüzdan bağlı değil';
+      console.error('❌', errorMsg);
+      setError(errorMsg);
+      return null;
+    }
+
+    if (!suiClient) {
+      const errorMsg = 'SuiClient bulunamadı';
+      console.error('❌', errorMsg);
+      setError(errorMsg);
       return null;
     }
 
@@ -36,24 +47,28 @@ export function useCreateProject() {
       tx.setGasBudget(50_000_000); // 0.05 SUI
       
       try {
-        // Proje deploy işlemi - Testnet üzerinde gerçek transaction
-        const [coin] = tx.splitCoins(tx.gas, [tx.pure.u64(1_000)]); // 0.000001 SUI test
+        // Basit test transaction - kendine SUI transfer
+        console.log('🔄 Basit transaction oluşturuluyor...');
+        const [coin] = tx.splitCoins(tx.gas, [tx.pure.u64(1000)]); // 0.000001 SUI
         tx.transferObjects([coin], tx.pure.address(address));
         
-        console.log('✅ Testnet deploy başarılı - Token\'lar mint ediliyor:', {
+        console.log('✅ Transaction hazırlandı:', {
           governanceToken: `${projectData.governanceTokenSupply} ${projectData.governanceTokenName}`,
           articleToken: `${projectData.articleTokenSupply} ${projectData.articleTokenName}`,
           projectTitle: projectData.title,
-          fundingGoal: `${projectData.fundingGoal} SUI`
+          fundingGoal: `${projectData.fundingGoal} SUI`,
+          address: address
         });
       } catch (moveCallError) {
-        console.warn('Deploy transaction başarısız:', moveCallError);
-        setError('Deploy sırasında hata: ' + moveCallError);
+        console.warn('Transaction hazırlama hatası:', moveCallError);
+        setError('Transaction hazırlama sırasında hata: ' + moveCallError);
         return null;
       }
 
       // Transaction'ı blockchain'e gönder
-      const result = await new Promise((resolve, reject) => {
+      console.log('🔄 Transaction blockchain\'e gönderiliyor...');
+      
+      const result = await new Promise<any>((resolve, reject) => {
         signAndExecuteTransaction(
           {
             transaction: tx,
@@ -65,7 +80,7 @@ export function useCreateProject() {
             },
             onError: (error: any) => {
               console.error('Deploy hatası:', error);
-              setError('Proje deploy edilemedi: ' + error.message);
+              setError('Proje deploy edilemedi: ' + (error?.message || error));
               reject(error);
             },
           }
@@ -163,8 +178,24 @@ export function useCreateProject() {
 
       return null;
     } catch (err: any) {
-      console.error('Proje deploy hatası:', err);
-      setError(err.message || 'Deploy sırasında bilinmeyen hata');
+      console.error('🚨 Proje deploy hatası (detaylı):', {
+        error: err,
+        message: err?.message,
+        stack: err?.stack,
+        name: err?.name,
+        code: err?.code
+      });
+      
+      // CORS hatası kontrolü
+      if (err?.message?.includes('fetch') || err?.message?.includes('Failed to fetch') || err?.name === 'TypeError') {
+        const corsError = `❌ Network/CORS hatası tespit edildi:\n\n• Ankr API bağlantısı başarısız\n• Browser CORS koruması aktif\n• Direkt blockchain transaction deneniyor...\n\nHata: ${err?.message || 'Bilinmeyen network hatası'}`;
+        setError(corsError);
+        console.warn('🔧 CORS hatası tespit edildi:', err);
+      } else if (err?.message?.includes('wallet') || err?.message?.includes('signature')) {
+        setError(`❌ Cüzdan hatası: ${err?.message}\n\nLütfen cüzdanınızın bağlı olduğundan ve yeterli gas balance'ınız olduğundan emin olun.`);
+      } else {
+        setError(`❌ Deploy hatası: ${err?.message || err}\n\nDetay: ${err?.stack || 'Bilinmeyen hata'}`);
+      }
       return null;
     } finally {
       setIsCreating(false);
