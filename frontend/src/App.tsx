@@ -130,12 +130,12 @@ function ArticleAccessButton({ project, userAddress }: {
           onClick={openArticle}
           className="w-full bg-purple-600 text-white py-2 px-3 rounded-lg text-sm font-medium hover:bg-purple-700 transition-colors flex items-center justify-center gap-2"
         >
-          📄 Makaleyi Aç (IPFS)
+           Makaleyi Aç (IPFS)
         </button>
       ) : (
         <div className="w-full bg-red-50 border border-red-200 rounded-lg p-2">
           <p className="text-xs text-red-600 text-center">
-            🔒 Makale erişimi için {project.articleMetadata?.minimumTokens || 1} $PAPER{project.governanceTokenName} token gerekli
+             Makale erişimi için {project.articleMetadata?.minimumTokens || 1} $PAPER{project.governanceTokenName} token gerekli
           </p>
           <p className="text-xs text-red-500 text-center mt-1">
             Mevcut: {accessResult?.balance || 0} token
@@ -202,11 +202,11 @@ function ArticleAccessButtonCompact({ project, userAddress }: {
           onClick={openArticle}
           className="text-xs text-purple-600 hover:text-purple-700 font-medium"
         >
-          📄 Makale (IPFS)
+           Makale (IPFS)
         </button>
       ) : (
         <span className="text-xs text-red-500">
-          🔒 {project.articleMetadata?.minimumTokens || 1} $PAPER gerekli
+           {project.articleMetadata?.minimumTokens || 1} $PAPER gerekli
         </span>
       )}
     </div>
