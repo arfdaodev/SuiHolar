@@ -118,3 +118,5 @@ build/
 # Temporary files
 *.tmp
 *.temp
+# Sui CLI directory
+sui

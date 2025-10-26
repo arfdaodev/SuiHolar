@@ -666,13 +666,13 @@ function WalletDebug() {
         console.log('⛽ Gas coins başarılı:', coins.data.length);
 
         // Son epoch bilgisi al (network test)
-        try {
+        /* try {
           const epoch = await suiClient.getCurrentEpoch();
           console.log('📊 Current epoch:', epoch);
           setNetwork(`✅ Testnet (Epoch: ${epoch})`);
         } catch (epochError) {
           console.warn('⚠️ Epoch bilgisi alınamadı:', epochError);
-        }
+        } */
 
       } catch (error) {
         console.error('❌ Network hatası:', error);

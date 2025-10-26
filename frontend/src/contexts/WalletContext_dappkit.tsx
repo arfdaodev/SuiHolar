@@ -16,7 +16,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 // Dynamic RPC Provider Selection with CORS fallback
 const getRpcUrl = (network: 'devnet' | 'testnet' | 'mainnet') => {
-  const provider = import.meta.env.VITE_RPC_PROVIDER || 'allthatnode';
+  const provider = import.meta.env.VITE_RPC_PROVIDER || 'official';
   
   switch (provider) {
     case 'official':
