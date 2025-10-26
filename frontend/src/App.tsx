@@ -354,9 +354,9 @@ function Dashboard({ setActiveTab }: {
                       onChange={(e) => setSortBy(e.target.value as 'date' | 'funding' | 'name')}
                       className="text-sm border border-gray-300 rounded-md px-3 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
-                      <option value="date">📅 Tarih</option>
-                      <option value="funding">💰 Yatırım</option>
-                      <option value="name">📝 İsim</option>
+                      <option value="date"> Tarih</option>
+                      <option value="funding"> Yatırım</option>
+                      <option value="name"> İsim</option>
                     </select>
                     <button
                       onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
@@ -401,7 +401,7 @@ function Dashboard({ setActiveTab }: {
                         {/* Durum Badge */}
                         <div className="absolute top-3 right-3">
                           <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 backdrop-blur-sm">
-                            📊 Aktif
+                             Aktif
                           </span>
                         </div>
                       </div>
@@ -418,11 +418,11 @@ function Dashboard({ setActiveTab }: {
                             <span className="text-sm font-semibold text-blue-600">{project.fundingGoal} SUI</span>
                           </div>
                           <div className="flex justify-between items-center">
-                            <span className="text-sm text-gray-500">📅 Süre</span>
+                            <span className="text-sm text-gray-500"> Süre</span>
                             <span className="text-sm font-medium">{formatTimeline(project.timeline)}</span>
                           </div>
                           <div className="flex justify-between items-center">
-                            <span className="text-sm text-gray-500">📅 Oluşturulma</span>
+                            <span className="text-sm text-gray-500"> Oluşturulma</span>
                             <span className="text-sm">{new Date(project.createdAt).toLocaleDateString('tr-TR')}</span>
                           </div>
                         </div>
@@ -431,11 +431,11 @@ function Dashboard({ setActiveTab }: {
                         {project.governanceTokenName && (
                           <div className="mb-4 space-y-1">
                             <div className="flex items-center justify-between p-2 bg-blue-50 rounded-lg">
-                              <span className="text-xs font-medium text-blue-700">🏛️ $PAPER{project.governanceTokenName}</span>
+                              <span className="text-xs font-medium text-blue-700"> $PAPER{project.governanceTokenName}</span>
                               <span className="text-xs text-blue-600">{project.governanceTokenSupply?.toLocaleString()}</span>
                             </div>
                             <div className="flex items-center justify-between p-2 bg-green-50 rounded-lg">
-                              <span className="text-xs font-medium text-green-700">📄 {project.articleTokenName}</span>
+                              <span className="text-xs font-medium text-green-700"> {project.articleTokenName}</span>
                               <span className="text-xs text-green-600">{project.articleTokenSupply}</span>
                             </div>
                           </div>
@@ -489,7 +489,7 @@ function Dashboard({ setActiveTab }: {
                             </div>
                           ) : (
                             <div className="flex-shrink-0 w-16 h-16 bg-gradient-to-br from-blue-100 to-purple-100 rounded-lg border border-gray-200 flex items-center justify-center">
-                              <span className="text-xl">🔬</span>
+                              <span className="text-xl"></span>
                             </div>
                           )}
                           
@@ -500,19 +500,19 @@ function Dashboard({ setActiveTab }: {
                             
                             {/* Proje Detayları */}
                             <div className="flex flex-wrap gap-4 text-xs text-gray-500">
-                              <span>💰 Hedef: {project.fundingGoal} SUI</span>
-                              <span>📅 Süre: {formatTimeline(project.timeline)}</span>
-                              <span>📅 Oluşturulma: {new Date(project.createdAt).toLocaleDateString('tr-TR')}</span>
+                              <span> Hedef: {project.fundingGoal} SUI</span>
+                              <span> Süre: {formatTimeline(project.timeline)}</span>
+                              <span> Oluşturulma: {new Date(project.createdAt).toLocaleDateString('tr-TR')}</span>
                             </div>
                             
                             {/* Token Bilgileri */}
                             {project.governanceTokenName && (
                               <div className="mt-2 flex flex-wrap gap-2">
                                 <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                  🏛️ $PAPER{project.governanceTokenName} ({project.governanceTokenSupply?.toLocaleString()})
+                                   $PAPER{project.governanceTokenName} ({project.governanceTokenSupply?.toLocaleString()})
                                 </span>
                                 <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                  📄 {project.articleTokenName} ({project.articleTokenSupply})
+                                   {project.articleTokenName} ({project.articleTokenSupply})
                                 </span>
                               </div>
                             )}
@@ -522,7 +522,7 @@ function Dashboard({ setActiveTab }: {
                         {/* Durum ve Aksiyonlar */}
                         <div className="ml-4 text-right">
                           <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                            📊 Aktif
+                             Aktif
                           </span>
                           <div className="mt-2 space-x-2">
                             <button className="text-xs text-blue-600 hover:text-blue-700 font-medium">
@@ -596,12 +596,12 @@ function WalletDebug() {
   const checkWalletStatus = async () => {
     if (isConnected && address) {
       try {
-        console.log('🔍 Network debug başlıyor...');
-        setNetwork('🔄 Bağlantı test ediliyor...');
+        console.log(' Network debug başlıyor...');
+        setNetwork(' Bağlantı test ediliyor...');
         
         // İlk olarak basit HTTP test - Sui Official (CORS-Free)
         try {
-          console.log('🔍 Sui Official API test başlıyor...');
+          console.log(' Sui Official API test başlıyor...');
           
           // CORS problemi yok, direkt test
           const testResponse = await fetch('https://fullnode.testnet.sui.io:443', {
@@ -620,25 +620,25 @@ function WalletDebug() {
           
           if (testResponse.ok) {
             const result = await testResponse.json();
-            console.log('✅ Sui Official RPC erişimi başarılı:', result);
-            setNetwork(`✅ Sui Official (Chain: ${result.result || 'Unknown'})`);
+            console.log('✅Sui Official RPC erişimi başarılı:', result);
+            setNetwork(` Sui Official (Chain: ${result.result || 'Unknown'})`);
           } else {
-            console.warn('⚠️ Sui Official RPC yanıt hatası:', testResponse.status);
-            setNetwork('⚠️ Sui Official RPC Yanıt Hatası');
+            console.warn(' Sui Official RPC yanıt hatası:', testResponse.status);
+            setNetwork('Sui Official RPC Yanıt Hatası');
           }
         } catch (httpError) {
-          console.warn('⚠️ Sui Official RPC test hatası:', httpError);
-          setNetwork('⚠️ Network Hatası');
+          console.warn('Sui Official RPC test hatası:', httpError);
+          setNetwork(' Network Hatası');
           
           // Fallback: SuiClient ile test
           try {
-            console.log('🔄 SuiClient ile fallback test...');
+            console.log(' SuiClient ile fallback test...');
             const balance = await suiClient.getBalance({ owner: address });
-            console.log('✅ SuiClient çalışıyor:', balance);
-            setNetwork('✅ SuiClient Aktif (via Sui Official)');
+            console.log(' SuiClient çalışıyor:', balance);
+            setNetwork(' SuiClient Aktif (via Sui Official)');
           } catch (suiError) {
-            console.error('❌ SuiClient de başarısız:', suiError);
-            setNetwork('❌ RPC Tamamen Başarısız');
+            console.error(' SuiClient de başarısız:', suiError);
+            setNetwork(' RPC Tamamen Başarısız');
           }
         }
 
@@ -650,11 +650,11 @@ function WalletDebug() {
         // Network bilgisi al - bu genellikle başarısız olabilir
         try {
           const chainId = await suiClient.getChainIdentifier();
-          setNetwork(`✅ ${chainId}`);
-          console.log('🌐 Chain ID başarılı:', chainId);
+          setNetwork(` ${chainId}`);
+          console.log(' Chain ID başarılı:', chainId);
         } catch (chainError) {
-          console.warn('⚠️ Chain ID alınamadı:', chainError);
-          setNetwork('✅ Testnet (RPC Aktif)');
+          console.warn(' Chain ID alınamadı:', chainError);
+          setNetwork('Testnet (RPC Aktif)');
         }
 
         // Gas coins say
@@ -663,20 +663,20 @@ function WalletDebug() {
           coinType: '0x2::sui::SUI'
         });
         setGasCoins(coins.data.length);
-        console.log('⛽ Gas coins başarılı:', coins.data.length);
+        console.log('Gas coins başarılı:', coins.data.length);
 
         // Son epoch bilgisi al (network test)
         /* try {
           const epoch = await suiClient.getCurrentEpoch();
-          console.log('📊 Current epoch:', epoch);
-          setNetwork(`✅ Testnet (Epoch: ${epoch})`);
+          console.log( Current epoch:', epoch);
+          setNetwork(` Testnet (Epoch: ${epoch})`);
         } catch (epochError) {
-          console.warn('⚠️ Epoch bilgisi alınamadı:', epochError);
+          console.warn(' Epoch bilgisi alınamadı:', epochError);
         } */
 
       } catch (error) {
-        console.error('❌ Network hatası:', error);
-        setNetwork('❌ RPC Bağlantı Hatası');
+        console.error(' Network hatası:', error);
+        setNetwork(' RPC Bağlantı Hatası');
         
         // Hata detayları
         if (error instanceof Error) {
@@ -685,7 +685,7 @@ function WalletDebug() {
         }
       }
     } else {
-      setNetwork('⚠️ Cüzdan Bağlı Değil');
+      setNetwork('Cüzdan Bağlı Değil');
     }
   };
 
@@ -711,7 +711,7 @@ function WalletDebug() {
             onClick={() => checkWalletStatus()}
             className="w-full bg-green-600 text-white text-xs py-1 px-2 rounded hover:bg-green-700"
           >
-            🔄 Network Yenile
+            Network Yenile
           </button>
           
           {Number(balance) < 0.1 && (
@@ -719,7 +719,7 @@ function WalletDebug() {
               onClick={() => window.open(`https://faucet.sui.io/gas?address=${address}`, '_blank')}
               className="w-full bg-blue-600 text-white text-xs py-1 px-2 rounded hover:bg-blue-700"
             >
-              🚰 Get Testnet SUI
+              Get Testnet SUI
             </button>
           )}
           
@@ -727,7 +727,7 @@ function WalletDebug() {
             onClick={() => window.open('https://suiscan.xyz/testnet', '_blank')}
             className="w-full bg-purple-600 text-white text-xs py-1 px-2 rounded hover:bg-purple-700"
           >
-            🔍 Sui Explorer
+            Sui Explorer
           </button>
           
           <button 
@@ -757,24 +757,24 @@ function WalletDebug() {
                 console.log('🧪 Sui Official RPC test sonucu:', result);
                 
                 if (result.result) {
-                  alert(`✅ RPC Bağlantısı Başarılı!\n\nProvider: Sui Official (Resmi)\nChain ID: ${result.result}\nCORS: ✅ Problem yok\nLimit: Unlimited`);
+                  alert(` RPC Bağlantısı Başarılı!\n\nProvider: Sui Official (Resmi)\nChain ID: ${result.result}\nCORS: ✅ Problem yok\nLimit: Unlimited`);
                 } else {
-                  alert(`❌ RPC Test Başarısız!\n\nHata: ${result.error?.message || 'Bilinmeyen hata'}`);
+                  alert(` RPC Test Başarısız!\n\nHata: ${result.error?.message || 'Bilinmeyen hata'}`);
                 }
               } catch (error: any) {
                 console.error('Manuel RPC test hatası:', error);
                 
                 // CORS hatası için özel mesaj
                 if (error?.message?.includes('fetch')) {
-                  alert(`⚠️ CORS/Network Hatası!\n\nBu normal bir durum:\n• Browser CORS koruması\n• RPC çalışıyor ama direkt test edilemiyor\n• SuiClient üzerinden çalışır\n\nÇözüm: Cüzdan transaction'ı deneyin!`);
+                  alert(` CORS/Network Hatası!\n\nBu normal bir durum:\n• Browser CORS koruması\n• RPC çalışıyor ama direkt test edilemiyor\n• SuiClient üzerinden çalışır\n\nÇözüm: Cüzdan transaction'ı deneyin!`);
                 } else {
-                  alert(`❌ RPC Bağlantı Hatası!\n\n${error}\n\nİnternet bağlantınızı kontrol edin.`);
+                  alert(` RPC Bağlantı Hatası!\n\n${error}\n\nİnternet bağlantınızı kontrol edin.`);
                 }
               }
             }}
             className="w-full bg-red-600 text-white text-xs py-1 px-2 rounded hover:bg-red-700"
           >
-            🧪 RPC Test Et
+             RPC Test Et
           </button>
         </div>
         
@@ -784,7 +784,7 @@ function WalletDebug() {
           <br />
           <strong>Endpoint:</strong> fullnode.testnet.sui.io:443
           <br />
-          <strong>API Key:</strong> ✅ Gerekmiyor (Free & Unlimited)
+          <strong>API Key:</strong>  Gerekmiyor (Free & Unlimited)
           <br />
           <strong>Status:</strong> {network.includes('✅') ? '🟢 Aktif' : '🔴 Hata'}
           <br />
@@ -923,11 +923,11 @@ function CreateProject() {
       setArticleUploadProgress(100);
       setIsUploadingArticle(false);
       
-      console.log('✅ Makale IPFS\'e yüklendi:', result);
-      alert(`✅ Makale başarıyla IPFS'e yüklendi!\nHash: ${result.hash}`);
+      console.log(' Makale IPFS\'e yüklendi:', result);
+      alert(`Makale başarıyla IPFS'e yüklendi!\nHash: ${result.hash}`);
       
     } catch (error) {
-      console.error('❌ Article IPFS upload hatası:', error);
+      console.error(' Article IPFS upload hatası:', error);
       alert('Makale yüklenirken hata oluştu: ' + error);
       setIsUploadingArticle(false);
       setArticleUploadProgress(0);
@@ -998,17 +998,17 @@ function CreateProject() {
 
       if (result?.success) {
         setSuccessMessage(
-          `🎉 Proje Testnet'te başarıyla deploy edildi!\n` +
-          `📝 Başlık: ${formData.title}\n` +
-          `💰 Hedef: ${formData.fundingGoal} SUI\n` +
-          `📅 Süre: ${formatTimeline(parseInt(formData.timeline))}\n` +
-          `🏛️ Yönetim Token: $PAPER${formData.governanceTokenName} (${formData.governanceTokenSupply})\n` +
-          `📄 Makale Token: ${formData.articleTokenName} (${formData.articleTokenSupply})\n` +
-          `🪙 Token'lar cüzdanınıza eklendi!\n` +
-          `🔗 Transaction: ${result.digest}\n` +
-          `${result.deployedOnTestnet ? '✅ Testnet\'te deploy edildi' : '⚠️ Simülasyon modu'}`
+          ` Proje Testnet'te başarıyla deploy edildi!\n` +
+          `Başlık: ${formData.title}\n` +
+          ` Hedef: ${formData.fundingGoal} SUI\n` +
+          ` Süre: ${formatTimeline(parseInt(formData.timeline))}\n` +
+          ` Yönetim Token: $PAPER${formData.governanceTokenName} (${formData.governanceTokenSupply})\n` +
+          ` Makale Token: ${formData.articleTokenName} (${formData.articleTokenSupply})\n` +
+          ` Token'lar cüzdanınıza eklendi!\n` +
+          ` Transaction: ${result.digest}\n` +
+          `${result.deployedOnTestnet ? ' Testnet\'te deploy edildi' : ' Simülasyon modu'}`
         );
-        console.log('🚀 Blockchain deploy başarılı:', result);
+        console.log(' Blockchain deploy başarılı:', result);
         
         // Formu temizle
         setFormData({
@@ -1082,7 +1082,7 @@ function CreateProject() {
         {/* Hata mesajı */}
         {error && (
           <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
-            ❌ {error}
+             {error}
           </div>
         )}
 
@@ -1122,7 +1122,7 @@ function CreateProject() {
           {/* Proje Görseli Upload */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              📸 Proje Görseli
+              Proje Görseli
             </label>
             <div className="space-y-3">
               {/* Image Preview */}
@@ -1189,7 +1189,7 @@ function CreateProject() {
                 </div>
               )}
               <p className="text-xs text-gray-500">
-                💡 Projenizi görsel olarak temsil eden bir resim yükleyin (opsiyonel)
+                 Projenizi görsel olarak temsil eden bir resim yükleyin (opsiyonel)
               </p>
             </div>
           </div>
@@ -1197,7 +1197,7 @@ function CreateProject() {
           {/* Makale Upload (IPFS) */}
           <div className="border-t border-gray-200 pt-6">
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              📄 Araştırma Makalesi (IPFS)
+               Araştırma Makalesi 
             </label>
             <div className="space-y-4">
               {/* Article Upload Area */}
@@ -1210,17 +1210,17 @@ function CreateProject() {
                         <span className="font-semibold text-green-800">{selectedArticle.name}</span>
                         {articleIPFSHash && (
                           <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                            ✅ IPFS'e Yüklendi
+                             Yüklendi
                           </span>
                         )}
                       </div>
                       
                       <div className="text-sm text-green-700 space-y-1">
-                        <p>📁 Boyut: {(selectedArticle.size / 1024 / 1024).toFixed(2)} MB</p>
-                        <p>🗂️ Tip: {selectedArticle.type}</p>
+                        <p> Boyut: {(selectedArticle.size / 1024 / 1024).toFixed(2)} MB</p>
+                        <p> Tip: {selectedArticle.type}</p>
                         {articleIPFSHash && (
                           <p className="font-mono text-xs break-all">
-                            🔗 IPFS Hash: {articleIPFSHash}
+                             Blob Hash: {articleIPFSHash}
                           </p>
                         )}
                       </div>
@@ -1229,7 +1229,7 @@ function CreateProject() {
                       {isUploadingArticle && (
                         <div className="mt-2">
                           <div className="flex justify-between text-xs text-green-600 mb-1">
-                            <span>IPFS'e yükleniyor...</span>
+                            <span>Yükleniyor...</span>
                             <span>{articleUploadProgress}%</span>
                           </div>
                           <div className="w-full h-2 bg-green-200 rounded-full overflow-hidden">
@@ -1261,7 +1261,7 @@ function CreateProject() {
                     {isUploadingArticle ? (
                       <>
                         <div className="w-6 h-6 mb-1 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-                        <p className="text-xs text-blue-600 font-semibold">IPFS'e yükleniyor...</p>
+                        <p className="text-xs text-blue-600 font-semibold">Yükleniyor...</p>
                       </>
                     ) : (
                       <>
@@ -1317,7 +1317,7 @@ function CreateProject() {
                   
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      🎫 Minimum $PAPER Token Gereksinimi
+                       Minimum $PAPER Token Gereksinimi
                     </label>
                     <input
                       type="number"
@@ -1334,7 +1334,7 @@ function CreateProject() {
               )}
               
               <p className="text-xs text-gray-500">
-                🔒 Yüklenen makale IPFS'te saklanır ve sadece $PAPER token holder'ları erişebilir
+                 Yüklenen makale Walrus'ta saklanır ve sadece $PAPER token holder'ları erişebilir
               </p>
             </div>
           </div>
@@ -1521,7 +1521,7 @@ function CreateProject() {
                 </>
               ) : (
                 <>
-                  <span>🚀</span>
+                  <span></span>
                   <span>Sui'de Proje Oluştur</span>
                 </>
               )}
@@ -1634,7 +1634,7 @@ function TokenManagement() {
               disabled={isLoading}
               className="text-blue-600 hover:text-blue-800 text-sm font-medium disabled:opacity-50"
             >
-              {isLoading ? 'Yükleniyor...' : '🔄 Yenile'}
+              {isLoading ? 'Yükleniyor...' : ' Yenile'}
             </button>
           </div>
           
@@ -1709,19 +1709,19 @@ function TokenManagement() {
               onClick={() => window.open('https://faucet.sui.io/gas', '_blank')}
               className="w-full bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition-colors"
             >
-              🚰 Testnet SUI Al
+               Testnet SUI Al
             </button>
             
             {/* Gerçek Blockchain Transaction Test - CORS Bypass */}
             <button 
               onClick={async () => {
                 try {
-                  console.log('🔍 Gerçek blockchain transaction test başlıyor...');
+                  console.log('Gerçek blockchain transaction test başlıyor...');
                   console.log('Current Address:', address);
                   console.log('SuiClient:', suiClient);
                   
                   if (!address) {
-                    alert('❌ Cüzdan adresi bulunamadı!');
+                    alert(' Cüzdan adresi bulunamadı!');
                     return;
                   }
                   
@@ -1729,10 +1729,10 @@ function TokenManagement() {
                   try {
                     console.log('🔄 SuiClient ile RPC test...');
                     const epoch = await suiClient.getCurrentEpoch();
-                    console.log('✅ RPC bağlantısı başarılı! Current epoch:', epoch);
+                    console.log(' RPC bağlantısı başarılı! Current epoch:', epoch);
                   } catch (rpcError) {
-                    console.error('❌ RPC bağlantı hatası:', rpcError);
-                    alert('❌ RPC bağlantısı başarısız! Sui Official endpoint kontrol edin.');
+                    console.error(' RPC bağlantı hatası:', rpcError);
+                    alert(' RPC bağlantısı başarısız! Sui Official endpoint kontrol edin.');
                     return;
                   }
                   
@@ -1742,10 +1742,10 @@ function TokenManagement() {
                     coinType: '0x2::sui::SUI'
                   });
                   
-                  console.log('💰 Gas coins:', gasCoins);
+                  console.log(' Gas coins:', gasCoins);
                   
                   if (gasCoins.data.length === 0) {
-                    alert('❌ Gas coin bulunamadı! Faucet\'ten SUI alın.');
+                    alert(' Gas coin bulunamadı! Faucet\'ten SUI alın.');
                     window.open(`https://faucet.sui.io/gas?address=${address}`, '_blank');
                     return;
                   }
@@ -1758,7 +1758,7 @@ function TokenManagement() {
                   const [transferCoin] = tx.splitCoins(tx.gas, [tx.pure.u64(1_000_000)]); // 0.001 SUI
                   tx.transferObjects([transferCoin], tx.pure.address(address));
                   
-                  console.log('📝 Transaction oluşturuldu:', tx);
+                  console.log(' Transaction oluşturuldu:', tx);
                   
                   // Transaction'ı gönder
                   const result = await new Promise((resolve, reject) => {
@@ -1768,11 +1768,11 @@ function TokenManagement() {
                       },
                       {
                         onSuccess: (result: any) => {
-                          console.log('✅ Transaction başarılı!', result);
+                          console.log(' Transaction başarılı!', result);
                           resolve(result);
                         },
                         onError: (error: any) => {
-                          console.error('❌ Transaction hatası:', error);
+                          console.error('Transaction hatası:', error);
                           reject(error);
                         },
                       }
@@ -1781,20 +1781,20 @@ function TokenManagement() {
                   
                   if (result) {
                     const digest = (result as any).digest;
-                    alert(`🎉 Gerçek blockchain transaction başarılı!\n\nProvider: Sui Official RPC\nCORS: ✅ Problem yok\n🔗 Transaction Digest: ${digest}\n\n✅ Sui Explorer'da görüntüle`);
+                    alert(` Gerçek blockchain transaction başarılı!\n\nProvider: Sui Official RPC\nCORS: ✅ Problem yok\n🔗 Transaction Digest: ${digest}\n\n✅ Sui Explorer'da görüntüle`);
                     
                     // Sui Explorer'da aç
                     window.open(`https://suiscan.xyz/testnet/tx/${digest}`, '_blank');
                   }
                   
                 } catch (error) {
-                  console.error('🚨 Transaction hatası:', error);
-                  alert(`❌ Transaction başarısız:\n\n${error}\n\nSui Official RPC problemi olabilir.`);
+                  console.error(' Transaction hatası:', error);
+                  alert(` Transaction başarısız:\n\n${error}\n\nSui Official RPC problemi olabilir.`);
                 }
               }}
               className="w-full bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition-colors font-medium"
             >
-              🧪 Gerçek Transaction Test (Sui Official)
+               Gerçek Transaction Test (Sui Official)
             </button>
             
             <button 
@@ -1815,7 +1815,7 @@ function TokenManagement() {
                   existingTokens.push(demoToken);
                   localStorage.setItem('sui_wallet_tokens', JSON.stringify(existingTokens));
                   
-                  alert('✅ Demo PAPER token eklendi! Token Yönetimi\'ne bakın.');
+                  alert(' Demo PAPER token eklendi! Token Yönetimi\'ne bakın.');
                   await fetchTokenBalances();
                 } catch (error) {
                   console.error('Demo token oluşturma hatası:', error);
@@ -1823,23 +1823,23 @@ function TokenManagement() {
               }}
               className="w-full bg-purple-600 text-white py-2 px-4 rounded-lg hover:bg-purple-700 transition-colors"
             >
-              🎯 Demo PAPER Token Ekle
+               Demo PAPER Token Ekle
             </button>
             <button 
               onClick={() => alert('Token stake özelliği yakında eklenecek!')}
               className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors"
             >
-              💎 Token Stake Et
+               Token Stake Et
             </button>
             <button 
               onClick={() => alert('Governance özelliği yakında eklenecek!')}
               className="w-full bg-purple-600 text-white py-2 px-4 rounded-lg hover:bg-purple-700 transition-colors"
             >
-              🗳️ Governance'a Katıl
+               Governance'a Katıl
             </button>
             <div className="mt-4 p-3 bg-gray-50 rounded-lg">
               <p className="text-sm text-gray-600">
-                💡 <strong>İpucu:</strong> Proje oluşturduğunuzda governance ve article token'ları otomatik olarak cüzdanınıza mint edilir!
+                 <strong>İpucu:</strong> Proje oluşturduğunuzda governance ve article token'ları otomatik olarak cüzdanınıza mint edilir!
               </p>
             </div>
           </div>
@@ -1872,11 +1872,11 @@ function App() {
         <div className="bg-green-100 border-b border-green-200 px-4 py-2">
           <div className="max-w-7xl mx-auto flex items-center justify-between">
             <div className="flex items-center space-x-2">
-              <span className="text-green-800 font-medium text-sm">🌐 Sui Testnet</span>
-              <span className="text-green-600 text-xs">Ankr RPC Provider (Premium)</span>
+              <span className="text-green-800 font-medium text-sm">🌐 Sui Network</span>
+              <span className="text-green-600 text-xs"></span>
             </div>
             <div className="text-green-600 text-xs">
-              ⚡ API Key Aktif • Yüksek Hız
+              
             </div>
           </div>
         </div>
